@@ -26,6 +26,7 @@ import org.springframework.util.ObjectUtils;
 /**
  * {@link WebServerFactoryCustomizer} to apply {@link ServerProperties} to Tomcat web
  * servers.
+ * {@link WebServerFactoryCustomizer}将{@link ServerProperties}应用到Tomcat Web服务器。
  *
  * @author Brian Clozel
  * @author Phillip Webb

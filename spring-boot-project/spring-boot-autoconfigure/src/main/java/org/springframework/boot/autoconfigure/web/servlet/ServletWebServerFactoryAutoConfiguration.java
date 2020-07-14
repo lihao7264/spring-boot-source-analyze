@@ -68,11 +68,13 @@ import org.springframework.util.ObjectUtils;
 		ServletWebServerFactoryConfiguration.EmbeddedUndertow.class })
 public class ServletWebServerFactoryAutoConfiguration {
 
+	// ServletWeb服务器的配置定制器
 	@Bean
 	public ServletWebServerFactoryCustomizer servletWebServerFactoryCustomizer(ServerProperties serverProperties) {
 		return new ServletWebServerFactoryCustomizer(serverProperties);
 	}
 
+	// tomcat服务的配置定制器
 	@Bean
 	@ConditionalOnClass(name = "org.apache.catalina.startup.Tomcat")
 	public TomcatServletWebServerFactoryCustomizer tomcatServletWebServerFactoryCustomizer(

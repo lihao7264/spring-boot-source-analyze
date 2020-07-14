@@ -26,6 +26,8 @@ import org.springframework.core.Ordered;
  * {@link WebServerFactoryCustomizer} to apply {@link ServerProperties} to servlet web
  * servers.
  *
+ * {@link WebServerFactoryCustomizer}以将{@link ServerProperties}应用于Servlet Web服务器。
+ *
  * @author Brian Clozel
  * @author Stephane Nicoll
  * @author Olivier Lamy
