@@ -30,6 +30,7 @@ public interface BindHandler {
 
 	/**
 	 * Default no-op bind handler.
+	 * 默认的无操作绑定处理器。
 	 */
 	BindHandler DEFAULT = new BindHandler() {
 

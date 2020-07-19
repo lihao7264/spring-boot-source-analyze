@@ -32,6 +32,7 @@ import org.springframework.util.MultiValueMap;
 
 /**
  * {@link Condition} that checks for specific resources.
+ * {@link Condition}，用于检查特定资源。
  *
  * @author Dave Syer
  * @see ConditionalOnResource
@@ -43,30 +44,38 @@ class OnResourceCondition extends SpringBootCondition {
 
 	@Override
 	public ConditionOutcome getMatchOutcome(ConditionContext context, AnnotatedTypeMetadata metadata) {
+		// 获取注解上的属性
 		MultiValueMap<String, Object> attributes = metadata
 				.getAllAnnotationAttributes(ConditionalOnResource.class.getName(), true);
+		// 获取资源加载器
 		ResourceLoader loader = (context.getResourceLoader() != null) ? context.getResourceLoader()
 				: this.defaultResourceLoader;
 		List<String> locations = new ArrayList<>();
+		// 获取属性中的资源路径
 		collectValues(locations, attributes.get("resources"));
 		Assert.isTrue(!locations.isEmpty(),
 				"@ConditionalOnResource annotations must specify at " + "least one resource location");
+		// 不存在的资源路径
 		List<String> missing = new ArrayList<>();
+		// 资源不存在，则加入到不存在的资源路径中
 		for (String location : locations) {
 			String resource = context.getEnvironment().resolvePlaceholders(location);
 			if (!loader.getResource(resource).exists()) {
 				missing.add(location);
 			}
 		}
+		// 资源不存在的集合不为空，则为不匹配的
 		if (!missing.isEmpty()) {
 			return ConditionOutcome.noMatch(ConditionMessage.forCondition(ConditionalOnResource.class)
 					.didNotFind("resource", "resources").items(Style.QUOTE, missing));
 		}
+		// 匹配
 		return ConditionOutcome.match(ConditionMessage.forCondition(ConditionalOnResource.class)
 				.found("location", "locations").items(locations));
 	}
 
 	private void collectValues(List<String> names, List<Object> values) {
+		// fpr循环增加
 		for (Object value : values) {
 			for (Object item : (Object[]) value) {
 				names.add((String) item);

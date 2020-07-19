@@ -35,18 +35,21 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 /**
  * {@link EnableAutoConfiguration Auto-configuration} for {@link TaskExecutor}.
- *
+ * {@link TaskExecutor}的{@link EnableAutoConfiguration 自动配置}。
  * @author Stephane Nicoll
  * @author Camille Vienot
  * @since 2.1.0
  */
+// 仅在类 ThreadPoolTaskExecutor 存在于 classpath 上时才生效
 @ConditionalOnClass(ThreadPoolTaskExecutor.class)
 @Configuration
+// 确保前缀为 spring.task.execution 的配置参数被加载到 bean TaskExecutionProperties
 @EnableConfigurationProperties(TaskExecutionProperties.class)
 public class TaskExecutionAutoConfiguration {
 
 	/**
 	 * Bean name of the application {@link TaskExecutor}.
+	 * 应用程序{@link TaskExecutor}的Bean名称。
 	 */
 	public static final String APPLICATION_TASK_EXECUTOR_BEAN_NAME = "applicationTaskExecutor";
 
@@ -80,11 +83,15 @@ public class TaskExecutionAutoConfiguration {
 		return builder;
 	}
 
+	//懒加载
 	@Lazy
+	// bean名称为applicationTaskExecutor、taskExecutor
 	@Bean(name = { APPLICATION_TASK_EXECUTOR_BEAN_NAME,
 			AsyncAnnotationBeanPostProcessor.DEFAULT_TASK_EXECUTOR_BEAN_NAME })
+	// 仅在不存在 Executor类 的 bean 不存在时才生效
 	@ConditionalOnMissingBean(Executor.class)
 	public ThreadPoolTaskExecutor applicationTaskExecutor(TaskExecutorBuilder builder) {
+		//建造ThreadPoolTaskExecutor对象(线程池任务执行器)
 		return builder.build();
 	}
 

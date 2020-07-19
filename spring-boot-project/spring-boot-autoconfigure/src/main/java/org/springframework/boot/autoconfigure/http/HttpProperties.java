@@ -25,7 +25,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
  * HTTP properties.
- *
+ * HTTP的配置
+ * spring.http打头的配置
  * @author Phillip Webb
  * @author Stephane Nicoll
  * @author Brian Clozel
@@ -37,11 +38,13 @@ public class HttpProperties {
 	/**
 	 * Whether logging of (potentially sensitive) request details at DEBUG and TRACE level
 	 * is allowed.
+	 * 是否允许在DEBUG和TRACE级别记录（潜在敏感）请求详细信息。
 	 */
 	private boolean logRequestDetails;
 
 	/**
 	 * HTTP encoding properties.
+	 * HTTP编码属性。
 	 */
 	private final Encoding encoding = new Encoding();
 
@@ -59,36 +62,43 @@ public class HttpProperties {
 
 	/**
 	 * Configuration properties for http encoding.
+	 * http编码的配置属性。
 	 */
 	public static class Encoding {
 
+		//默认utf-8编码
 		public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
 		/**
 		 * Charset of HTTP requests and responses. Added to the "Content-Type" header if
 		 * not set explicitly.
+		 * HTTP请求和响应的字符集。 如果未明确设置，则添加到“ Content-Type”标题中。
 		 */
 		private Charset charset = DEFAULT_CHARSET;
 
 		/**
 		 * Whether to force the encoding to the configured charset on HTTP requests and
 		 * responses.
+		 * 是否在HTTP请求和响应上强制对配置的字符集进行编码。
 		 */
 		private Boolean force;
 
 		/**
 		 * Whether to force the encoding to the configured charset on HTTP requests.
 		 * Defaults to true when "force" has not been specified.
+		 * 是否在HTTP请求上强制对配置的字符集进行编码。 如果未指定force，则默认为true。
 		 */
 		private Boolean forceRequest;
 
 		/**
 		 * Whether to force the encoding to the configured charset on HTTP responses.
+		 * 是否在HTTP响应上强制对配置的字符集进行编码。
 		 */
 		private Boolean forceResponse;
 
 		/**
 		 * Locale in which to encode mapping.
+		 * 编码映射的语言环境。
 		 */
 		private Map<Locale, Charset> mapping;
 

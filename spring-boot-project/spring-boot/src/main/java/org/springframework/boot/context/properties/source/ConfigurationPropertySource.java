@@ -22,6 +22,7 @@ import org.springframework.boot.origin.OriginTrackedValue;
 
 /**
  * A source of {@link ConfigurationProperty ConfigurationProperties}.
+ * {@link ConfigurationProperty ConfigurationProperties}的属性源。
  *
  * @author Phillip Webb
  * @author Madhura Bhave

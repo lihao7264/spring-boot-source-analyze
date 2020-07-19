@@ -20,6 +20,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 /**
  * Callback interface that can be used to customize a {@link ThreadPoolTaskExecutor}.
+ * 可以用于自定义{@link ThreadPoolTaskExecutor}的回调接口。
  *
  * @author Stephane Nicoll
  * @since 2.1.0
@@ -30,6 +31,7 @@ public interface TaskExecutorCustomizer {
 
 	/**
 	 * Callback to customize a {@link ThreadPoolTaskExecutor} instance.
+	 * 回调以自定义{@link ThreadPoolTaskExecutor}实例。
 	 * @param taskExecutor the task executor to customize
 	 */
 	void customize(ThreadPoolTaskExecutor taskExecutor);

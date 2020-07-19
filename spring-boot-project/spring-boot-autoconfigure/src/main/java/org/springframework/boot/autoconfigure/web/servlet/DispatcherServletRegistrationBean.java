@@ -26,6 +26,9 @@ import org.springframework.web.servlet.DispatcherServlet;
  * {@link ServletRegistrationBean} for the auto-configured {@link DispatcherServlet}. Both
  * registers the servlet and exposes {@link DispatcherServletPath} information.
  *
+ * {@link ServletRegistrationBean}用于自动配置的{@link DispatcherServlet}。
+ * 两者都注册servlet并公开{@link DispatcherServletPath}信息。
+ *
  * @author Phillip Webb
  * @since 2.0.4
  */

@@ -149,6 +149,7 @@ public class Binder {
 	/**
 	 * Bind the specified target {@link Bindable} using this binder's
 	 * {@link ConfigurationPropertySource property sources}.
+	 * 使用此绑定器的属性源，绑定指定的 可绑定的目标。
 	 * @param name the configuration property name to bind
 	 * @param target the target bindable
 	 * @param <T> the bound type
@@ -188,6 +189,7 @@ public class Binder {
 	/**
 	 * Bind the specified target {@link Bindable} using this binder's
 	 * {@link ConfigurationPropertySource property sources}.
+	 * 使用此绑定器的属性源，绑定指定的可绑定的目标。
 	 * @param name the configuration property name to bind
 	 * @param target the target bindable
 	 * @param handler the bind handler (may be {@code null})
@@ -197,6 +199,7 @@ public class Binder {
 	public <T> BindResult<T> bind(ConfigurationPropertyName name, Bindable<T> target, BindHandler handler) {
 		Assert.notNull(name, "Name must not be null");
 		Assert.notNull(target, "Target must not be null");
+		// 绑定处理器为空的话，则设置默认的无操作绑定处理器。
 		handler = (handler != null) ? handler : BindHandler.DEFAULT;
 		Context context = new Context();
 		T bound = bind(name, target, handler, context, false);

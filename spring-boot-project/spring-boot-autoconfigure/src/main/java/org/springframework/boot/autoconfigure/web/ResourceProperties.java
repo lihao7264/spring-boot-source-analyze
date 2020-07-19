@@ -27,6 +27,7 @@ import org.springframework.http.CacheControl;
 
 /**
  * Properties used to configure resource handling.
+ * 用于配置资源处理的属性。
  *
  * @author Phillip Webb
  * @author Brian Clozel
@@ -44,11 +45,13 @@ public class ResourceProperties {
 	/**
 	 * Locations of static resources. Defaults to classpath:[/META-INF/resources/,
 	 * /resources/, /static/, /public/].
+	 * 静态资源的位置。 默认为类路径：[/META-INF/resources /、/resources/、/static/、/public/]。
 	 */
 	private String[] staticLocations = CLASSPATH_RESOURCE_LOCATIONS;
 
 	/**
 	 * Whether to enable default resource handling.
+	 * 是否启用默认资源处理。
 	 */
 	private boolean addMappings = true;
 
@@ -68,6 +71,7 @@ public class ResourceProperties {
 		String[] normalized = new String[staticLocations.length];
 		for (int i = 0; i < staticLocations.length; i++) {
 			String location = staticLocations[i];
+			//若路径为/resources，则处理为/resources/
 			normalized[i] = location.endsWith("/") ? location : location + "/";
 		}
 		return normalized;
@@ -91,28 +95,35 @@ public class ResourceProperties {
 
 	/**
 	 * Configuration for the Spring Resource Handling chain.
+	 * Spring资源处理链的配置。
 	 */
 	public static class Chain {
 
 		/**
 		 * Whether to enable the Spring Resource Handling chain. By default, disabled
 		 * unless at least one strategy has been enabled.
+		 * 是否启用Spring Resource Handling链。
+		 * 默认情况下，除非已启用至少一种策略，否则禁用。
 		 */
 		private Boolean enabled;
 
 		/**
 		 * Whether to enable caching in the Resource chain.
+		 * 是否在资源链中启用缓存。(默认启用)
 		 */
 		private boolean cache = true;
 
 		/**
 		 * Whether to enable HTML5 application cache manifest rewriting.
+		 * 是否启用HTML5应用程序缓存清单重写。
 		 */
 		private boolean htmlApplicationCache = false;
 
 		/**
 		 * Whether to enable resolution of already compressed resources (gzip, brotli).
 		 * Checks for a resource name with the '.gz' or '.br' file extensions.
+		 * 是否启用已压缩资源（gzip，brotli）的解析。
+		 * 检查带有".gz"或".br"文件扩展名的资源名称。
 		 */
 		private boolean compressed = false;
 
@@ -121,8 +132,12 @@ public class ResourceProperties {
 		/**
 		 * Return whether the resource chain is enabled. Return {@code null} if no
 		 * specific settings are present.
+		 *
+		 * 返回是否启用资源链。 如果没有特定设置，则返回{@code null}。
+		 *
 		 * @return whether the resource chain is enabled or {@code null} if no specified
 		 * settings are present.
+		 * 是启用资源链，还是如果没有指定的设置，则返回{@code null}。
 		 */
 		public Boolean getEnabled() {
 			return getEnabled(getStrategy().getFixed().isEnabled(), getStrategy().getContent().isEnabled(),
@@ -169,6 +184,7 @@ public class ResourceProperties {
 
 	/**
 	 * Strategies for extracting and embedding a resource version in its URL path.
+	 * 在资源版本的URL路径中提取和嵌入资源版本的策略。
 	 */
 	public static class Strategy {
 
@@ -188,16 +204,19 @@ public class ResourceProperties {
 
 	/**
 	 * Version Strategy based on content hashing.
+	 * 基于内容哈希的版本策略。
 	 */
 	public static class Content {
 
 		/**
 		 * Whether to enable the content Version Strategy.
+		 * 是否启用内容版本策略。
 		 */
 		private boolean enabled;
 
 		/**
 		 * Comma-separated list of patterns to apply to the content Version Strategy.
+		 * 以逗号分隔的模式列表，这些模式应用于内容版本策略。
 		 */
 		private String[] paths = new String[] { "/**" };
 
@@ -221,21 +240,25 @@ public class ResourceProperties {
 
 	/**
 	 * Version Strategy based on a fixed version string.
+	 * 基于固定版本字符串的版本策略。
 	 */
 	public static class Fixed {
 
 		/**
 		 * Whether to enable the fixed Version Strategy.
+		 * 是否启用固定的版本策略。
 		 */
 		private boolean enabled;
 
 		/**
 		 * Comma-separated list of patterns to apply to the fixed Version Strategy.
+		 * 逗号分隔的模式列表，适用于固定的版本策略。
 		 */
 		private String[] paths = new String[] { "/**" };
 
 		/**
 		 * Version string to use for the fixed Version Strategy.
+		 * 用于固定版本策略的版本字符串。
 		 */
 		private String version;
 
@@ -267,6 +290,7 @@ public class ResourceProperties {
 
 	/**
 	 * Cache configuration.
+	 * 缓存配置。
 	 */
 	public static class Cache {
 
@@ -274,6 +298,9 @@ public class ResourceProperties {
 		 * Cache period for the resources served by the resource handler. If a duration
 		 * suffix is not specified, seconds will be used. Can be overridden by the
 		 * 'spring.resources.cache.cachecontrol' properties.
+		 * 资源处理程序服务的资源的缓存周期。
+		 * 如果未指定持续时间后缀，则将使用秒。
+		 * 可以被'spring.resources.cache.cachecontrol'属性覆盖。
 		 */
 		@DurationUnit(ChronoUnit.SECONDS)
 		private Duration period;
@@ -281,6 +308,7 @@ public class ResourceProperties {
 		/**
 		 * Cache control HTTP headers, only allows valid directive combinations. Overrides
 		 * the 'spring.resources.cache.period' property.
+		 * 缓存控制HTTP标头，仅允许有效的指令组合。 覆盖“spring.resources.cache.period”属性。
 		 */
 		private final Cachecontrol cachecontrol = new Cachecontrol();
 
@@ -298,12 +326,14 @@ public class ResourceProperties {
 
 		/**
 		 * Cache Control HTTP header configuration.
+		 * 缓存控制HTTP请求头配置。
 		 */
 		public static class Cachecontrol {
 
 			/**
 			 * Maximum time the response should be cached, in seconds if no duration
 			 * suffix is not specified.
+			 * 应该缓存响应的最长时间，如果未指定持续时间后缀，则以秒为单位。
 			 */
 			@DurationUnit(ChronoUnit.SECONDS)
 			private Duration maxAge;
@@ -311,40 +341,48 @@ public class ResourceProperties {
 			/**
 			 * Indicate that the cached response can be reused only if re-validated with
 			 * the server.
+			 * 表示仅在与服务器重新验证后才可以重用缓存的响应。
 			 */
 			private Boolean noCache;
 
 			/**
 			 * Indicate to not cache the response in any case.
+			 * 表示在任何情况下都不缓存响应。
 			 */
 			private Boolean noStore;
 
 			/**
 			 * Indicate that once it has become stale, a cache must not use the response
 			 * without re-validating it with the server.
+			 * 表示一旦过时，缓存必须在未与服务器重新验证响应的情况下使用响应。
 			 */
 			private Boolean mustRevalidate;
 
 			/**
 			 * Indicate intermediaries (caches and others) that they should not transform
 			 * the response content.
+			 * 表示中介（缓存和其他中介）不应转换响应内容。
 			 */
 			private Boolean noTransform;
 
 			/**
 			 * Indicate that any cache may store the response.
+			 * 表示任何缓存都可以存储响应。
 			 */
 			private Boolean cachePublic;
 
 			/**
 			 * Indicate that the response message is intended for a single user and must
 			 * not be stored by a shared cache.
+			 * 表示响应消息是针对单个用户的，并且不得由共享缓存存储。
 			 */
 			private Boolean cachePrivate;
 
 			/**
 			 * Same meaning as the "must-revalidate" directive, except that it does not
 			 * apply to private caches.
+			 *
+			 * 与“必须重新验证”指令的含义相同，只不过它不适用于专用缓存。
 			 */
 			private Boolean proxyRevalidate;
 
@@ -358,6 +396,7 @@ public class ResourceProperties {
 			/**
 			 * Maximum time the response may be used when errors are encountered, in
 			 * seconds if no duration suffix is not specified.
+			 * 遇到错误时可以使用响应的最长时间，如果未指定持续时间后缀，则以秒为单位。
 			 */
 			@DurationUnit(ChronoUnit.SECONDS)
 			private Duration staleIfError;
@@ -365,6 +404,7 @@ public class ResourceProperties {
 			/**
 			 * Maximum time the response should be cached by shared caches, in seconds if
 			 * no duration suffix is not specified.
+			 * 如果未指定持续时间后缀，则响应应由共享缓存缓存的最长时间（以秒为单位）。
 			 */
 			@DurationUnit(ChronoUnit.SECONDS)
 			private Duration sMaxAge;

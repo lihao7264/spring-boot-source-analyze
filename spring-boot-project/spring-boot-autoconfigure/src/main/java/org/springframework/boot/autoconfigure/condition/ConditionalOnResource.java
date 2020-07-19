@@ -28,6 +28,8 @@ import org.springframework.context.annotation.Conditional;
  * {@link Conditional} that only matches when the specified resources are on the
  * classpath.
  *
+ * {@link Conditional}仅在类路径上有指定资源时匹配。
+ *
  * @author Dave Syer
  * @since 1.0.0
  */
@@ -39,7 +41,9 @@ public @interface ConditionalOnResource {
 
 	/**
 	 * The resources that must be present.
+	 * 必须存在的资源。
 	 * @return the resource paths that must be present.
+	 * 必须存在的资源路径。
 	 */
 	String[] resources() default {};
 

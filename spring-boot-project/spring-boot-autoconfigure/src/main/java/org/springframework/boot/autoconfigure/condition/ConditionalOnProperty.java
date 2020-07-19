@@ -97,6 +97,7 @@ public @interface ConditionalOnProperty {
 
 	/**
 	 * Alias for {@link #name()}.
+	 * name的别名
 	 * @return the names
 	 */
 	String[] value() default {};
@@ -105,6 +106,7 @@ public @interface ConditionalOnProperty {
 	 * A prefix that should be applied to each property. The prefix automatically ends
 	 * with a dot if not specified. A valid prefix is defined by one or more words
 	 * separated with dots (e.g. {@code "acme.system.feature"}).
+	 * 属性前缀
 	 * @return the prefix
 	 */
 	String prefix() default "";
@@ -117,6 +119,11 @@ public @interface ConditionalOnProperty {
 	 * <p>
 	 * Use the dashed notation to specify each property, that is all lower case with a "-"
 	 * to separate words (e.g. {@code my-long-property}).
+	 * 要测试的属性的名称。
+	 * 如果定义了前缀，则将其用于计算每个属性的完整key。
+	 * 例如，如果前缀为{@code app.config}，而一个值为{@code my-value}，则完整的key为{@code app.config.my-value}
+	 * 使用虚线符号指定每个属性，所有属性均使用小写字母"-"来分隔单词（例如{@code my-long-property}）。
+	 * 属性名(字符串数组)。
 	 * @return the names
 	 */
 	String[] name() default {};
@@ -124,6 +131,7 @@ public @interface ConditionalOnProperty {
 	/**
 	 * The string representation of the expected value for the properties. If not
 	 * specified, the property must <strong>not</strong> be equal to {@code false}.
+	 * 预期值。
 	 * @return the expected value
 	 */
 	String havingValue() default "";
@@ -131,6 +139,9 @@ public @interface ConditionalOnProperty {
 	/**
 	 * Specify if the condition should match if the property is not set. Defaults to
 	 * {@code false}.
+	 * 如果属性名不存在，条件是否成立。
+	 * true的话，则成立
+	 * false的话，则不成立
 	 * @return if should match if the property is missing
 	 */
 	boolean matchIfMissing() default false;

@@ -39,23 +39,32 @@ import org.springframework.web.servlet.mvc.ParameterizableViewController;
  * static and templated files. If both a static and templated index page are available,
  * the static page is preferred.
  *
+ * 应用程序欢迎页面的{@link AbstractUrlHandlerMapping}。
+ * 同时支持静态文件和模板文件。
+ * 如果静态和模板索引页均可用，则首选静态页。
+ *
  * @author Andy Wilkinson
  * @author Bruce Brouwer
  */
 final class WelcomePageHandlerMapping extends AbstractUrlHandlerMapping {
 
+	// 日志
 	private static final Log logger = LogFactory.getLog(WelcomePageHandlerMapping.class);
 
+	// 所有媒体类型
 	private static final List<MediaType> MEDIA_TYPES_ALL = Collections.singletonList(MediaType.ALL);
 
 	WelcomePageHandlerMapping(TemplateAvailabilityProviders templateAvailabilityProviders,
 			ApplicationContext applicationContext, Optional<Resource> welcomePage, String staticPathPattern) {
+		// 资源存在且静态资源路径为/**
 		if (welcomePage.isPresent() && "/**".equals(staticPathPattern)) {
 			logger.info("Adding welcome page: " + welcomePage.get());
+			// 设置根view为"forward:index.html"
 			setRootViewName("forward:index.html");
 		}
 		else if (welcomeTemplateExists(templateAvailabilityProviders, applicationContext)) {
 			logger.info("Adding welcome page template: index");
+			// 设置根view为"index"
 			setRootViewName("index");
 		}
 	}

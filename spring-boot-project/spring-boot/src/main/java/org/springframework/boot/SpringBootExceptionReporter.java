@@ -26,6 +26,9 @@ import org.springframework.core.io.support.SpringFactoriesLoader;
  * {@link SpringFactoriesLoader} and must declare a public constructor with a single
  * {@link ConfigurableApplicationContext} parameter.
  *
+ * 用于支持 SpringApplication 启动错误报告的自定义报告的回调接口，
+ * 它通过 SpringFactoriesLoader 加载，并且必须使用单个 ConfigurableApplicationContext 参数声明公共构造函数。
+ *
  * @author Phillip Webb
  * @since 2.0.0
  * @see ApplicationContextAware

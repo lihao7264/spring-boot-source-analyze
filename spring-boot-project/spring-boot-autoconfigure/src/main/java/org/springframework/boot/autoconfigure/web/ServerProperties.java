@@ -43,7 +43,7 @@ import org.springframework.util.unit.DataSize;
 
 /**
  * {@link ConfigurationProperties} for a web server (e.g. port and path settings).
- *
+ * Web服务器的{@link ConfigurationProperties}（例如端口和路径设置）。
  * @author Dave Syer
  * @author Stephane Nicoll
  * @author Andy Wilkinson

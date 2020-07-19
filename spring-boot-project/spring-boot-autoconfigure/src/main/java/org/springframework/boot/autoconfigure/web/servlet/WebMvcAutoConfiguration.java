@@ -127,7 +127,7 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
 /**
  * {@link EnableAutoConfiguration Auto-configuration} for {@link EnableWebMvc Web MVC}.
  *
- * {@link EnableWebMvc Web MVC}的{@link EnableAutoConfiguration自动配置}。
+ * {@link EnableWebMvc Web MVC}的{@link EnableAutoConfiguration 自动配置}。
  *
  * @author Phillip Webb
  * @author Dave Syer
@@ -176,6 +176,7 @@ public class WebMvcAutoConfiguration {
 
 	static String[] getResourceLocations(String[] staticLocations) {
 		String[] locations = new String[staticLocations.length + SERVLET_LOCATIONS.length];
+		// 合并staticLocations、SERVLET_LOCATIONS
 		System.arraycopy(staticLocations, 0, locations, 0, staticLocations.length);
 		System.arraycopy(SERVLET_LOCATIONS, 0, locations, staticLocations.length, SERVLET_LOCATIONS.length);
 		return locations;
@@ -184,7 +185,10 @@ public class WebMvcAutoConfiguration {
 	// Defined as a nested config to ensure WebMvcConfigurer is not read when not
 	// on the classpath
 	@Configuration
+	// 导入EnableWebMvcConfiguration类
 	@Import(EnableWebMvcConfiguration.class)
+	// 确保前缀为 spring.resources 的配置参数被加载到 bean ResourceProperties
+	// 确保前缀为 spring.mvc 的配置参数被加载到 bean WebMvcProperties
 	@EnableConfigurationProperties({ WebMvcProperties.class, ResourceProperties.class })
 	@Order(0)
 	public static class WebMvcAutoConfigurationAdapter implements WebMvcConfigurer {
@@ -211,6 +215,7 @@ public class WebMvcAutoConfiguration {
 			this.resourceHandlerRegistrationCustomizer = resourceHandlerRegistrationCustomizerProvider.getIfAvailable();
 		}
 
+		// 配置HttpMessageConverter
 		@Override
 		public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
 			this.messageConvertersProvider
@@ -219,22 +224,34 @@ public class WebMvcAutoConfiguration {
 
 		@Override
 		public void configureAsyncSupport(AsyncSupportConfigurer configurer) {
+			// 包含applicationTaskExecutor bean的话
 			if (this.beanFactory.containsBean(TaskExecutionAutoConfiguration.APPLICATION_TASK_EXECUTOR_BEAN_NAME)) {
+				// 获取applicationTaskExecutor的bean对象
 				Object taskExecutor = this.beanFactory
 						.getBean(TaskExecutionAutoConfiguration.APPLICATION_TASK_EXECUTOR_BEAN_NAME);
+				// 如果是AsyncTaskExecutor的子类(比如ThreadPoolTaskExecutor类)，则添加到
 				if (taskExecutor instanceof AsyncTaskExecutor) {
 					configurer.setTaskExecutor(((AsyncTaskExecutor) taskExecutor));
 				}
 			}
+			// 异步请求处理超时之前的时间
 			Duration timeout = this.mvcProperties.getAsync().getRequestTimeout();
 			if (timeout != null) {
+				// 更新超时时间
 				configurer.setDefaultTimeout(timeout.toMillis());
 			}
 		}
 
 		@Override
 		public void configurePathMatch(PathMatchConfigurer configurer) {
+			/**
+			 * spring mvc 默认忽略 url 中点"."后面的部分，如
+			 * http://localhost:8080/abc.mm  会直接匹配为
+			 * http://localhost:8080/abc 忽略了 mm
+			 * 如果不想忽略，设置 setUseSuffixPatternMatch(false)
+			 */
 			configurer.setUseSuffixPatternMatch(this.mvcProperties.getPathmatch().isUseSuffixPattern());
+			// 同use-suffix-pattern作用一致，但仅支持注册过的后缀，这样更安全
 			configurer.setUseRegisteredSuffixPatternMatch(
 					this.mvcProperties.getPathmatch().isUseRegisteredSuffixPattern());
 		}
@@ -251,44 +268,57 @@ public class WebMvcAutoConfiguration {
 			mediaTypes.forEach(configurer::mediaType);
 		}
 
+		// 最常用的视图解析器
 		@Bean
 		@ConditionalOnMissingBean
 		public InternalResourceViewResolver defaultViewResolver() {
 			InternalResourceViewResolver resolver = new InternalResourceViewResolver();
+			// 使用视图前后缀拼接的方式
 			resolver.setPrefix(this.mvcProperties.getView().getPrefix());
 			resolver.setSuffix(this.mvcProperties.getView().getSuffix());
 			return resolver;
 		}
 
 		@Bean
+		// 仅在类型为  View 的 bean 存在时才生效
 		@ConditionalOnBean(View.class)
 		@ConditionalOnMissingBean
 		public BeanNameViewResolver beanNameViewResolver() {
 			BeanNameViewResolver resolver = new BeanNameViewResolver();
+			// 设置优先级
 			resolver.setOrder(Ordered.LOWEST_PRECEDENCE - 10);
 			return resolver;
 		}
 
 		@Bean
+		// 仅在类型为  ViewResolver 的 bean 存在时才生效
 		@ConditionalOnBean(ViewResolver.class)
+		// 仅在名称为 viewResolver且类型为ContentNegotiatingViewResolver 的 bean 不存在时才生效
 		@ConditionalOnMissingBean(name = "viewResolver", value = ContentNegotiatingViewResolver.class)
 		public ContentNegotiatingViewResolver viewResolver(BeanFactory beanFactory) {
 			ContentNegotiatingViewResolver resolver = new ContentNegotiatingViewResolver();
 			resolver.setContentNegotiationManager(beanFactory.getBean(ContentNegotiationManager.class));
 			// ContentNegotiatingViewResolver uses all the other view resolvers to locate
 			// a view so it should have a high precedence
+			// ContentNegotiatingViewResolver使用所有其它视图解析器来定位视图，因此它应具有较高的优先级
+			// 设置优先级
 			resolver.setOrder(Ordered.HIGHEST_PRECEDENCE);
 			return resolver;
 		}
 
+		// 国际化组件
 		@Bean
 		@ConditionalOnMissingBean
+		// 如果spring.mvc.locale配置不存在，则不进行加载
 		@ConditionalOnProperty(prefix = "spring.mvc", name = "locale")
 		public LocaleResolver localeResolver() {
+			//  如果配置为始终使用配置的语言环境的话。
 			if (this.mvcProperties.getLocaleResolver() == WebMvcProperties.LocaleResolver.FIXED) {
 				return new FixedLocaleResolver(this.mvcProperties.getLocale());
 			}
+			//仅使用HTTP请求的"accept-language"请求头中指定的主要语言环境
 			AcceptHeaderLocaleResolver localeResolver = new AcceptHeaderLocaleResolver();
+			// 默认环境为配置的环境
 			localeResolver.setDefaultLocale(this.mvcProperties.getLocale());
 			return localeResolver;
 		}
@@ -316,24 +346,35 @@ public class WebMvcAutoConfiguration {
 			}
 		}
 
+		/**
+		 * 获取某种class类型的所有bean实例
+		 * @param type
+		 * @param <T>
+		 * @return
+		 */
 		private <T> Collection<T> getBeansOfType(Class<T> type) {
 			return this.beanFactory.getBeansOfType(type).values();
 		}
 
 		@Override
 		public void addResourceHandlers(ResourceHandlerRegistry registry) {
+			// 如果未启用默认资源处理，则直接返回
 			if (!this.resourceProperties.isAddMappings()) {
 				logger.debug("Default resource handling disabled");
 				return;
 			}
 			Duration cachePeriod = this.resourceProperties.getCache().getPeriod();
 			CacheControl cacheControl = this.resourceProperties.getCache().getCachecontrol().toHttpCacheControl();
+			//将 /webjars 路径下的资源都映射到 classpath:/META-INF/resources/webjars 中。
 			if (!registry.hasMappingForPattern("/webjars/**")) {
 				customizeResourceHandlerRegistration(registry.addResourceHandler("/webjars/**")
 						.addResourceLocations("classpath:/META-INF/resources/webjars/")
 						.setCachePeriod(getSeconds(cachePeriod)).setCacheControl(cacheControl));
 			}
+			// 映射静态资源路径
 			String staticPathPattern = this.mvcProperties.getStaticPathPattern();
+			// 默认情况下静态资源路径从/**映射为[/META-INF/resources /、/resources/、/static/、/public/]
+			// 否则按照配置来
 			if (!registry.hasMappingForPattern(staticPathPattern)) {
 				customizeResourceHandlerRegistration(registry.addResourceHandler(staticPathPattern)
 						.addResourceLocations(getResourceLocations(this.resourceProperties.getStaticLocations()))
@@ -359,6 +400,7 @@ public class WebMvcAutoConfiguration {
 		}
 
 		@Configuration
+		// 如果spring.mvc.favicon.enabled配置有或者没有都进行加载
 		@ConditionalOnProperty(value = "spring.mvc.favicon.enabled", matchIfMissing = true)
 		public static class FaviconConfiguration implements ResourceLoaderAware {
 
@@ -375,25 +417,31 @@ public class WebMvcAutoConfiguration {
 				this.resourceLoader = resourceLoader;
 			}
 
+			// 配置图标映射器
 			@Bean
 			public SimpleUrlHandlerMapping faviconHandlerMapping() {
 				SimpleUrlHandlerMapping mapping = new SimpleUrlHandlerMapping();
 				mapping.setOrder(Ordered.HIGHEST_PRECEDENCE + 1);
+				// **/favicon.ico  ---> faviconRequestHandler(放在静态路径下的任意位置都可)
 				mapping.setUrlMap(Collections.singletonMap("**/favicon.ico", faviconRequestHandler()));
 				return mapping;
 			}
 
+			// 图标请求处理器
 			@Bean
 			public ResourceHttpRequestHandler faviconRequestHandler() {
+				// Http资源请求处理器
 				ResourceHttpRequestHandler requestHandler = new ResourceHttpRequestHandler();
 				requestHandler.setLocations(resolveFaviconLocations());
 				return requestHandler;
 			}
 
 			private List<Resource> resolveFaviconLocations() {
+				// 静态资源路径
 				String[] staticLocations = getResourceLocations(this.resourceProperties.getStaticLocations());
 				List<Resource> locations = new ArrayList<>(staticLocations.length + 1);
 				Arrays.stream(staticLocations).map(this.resourceLoader::getResource).forEach(locations::add);
+				// "/"路径增加
 				locations.add(new ClassPathResource("/"));
 				return Collections.unmodifiableList(locations);
 			}
@@ -404,6 +452,8 @@ public class WebMvcAutoConfiguration {
 
 	/**
 	 * Configuration equivalent to {@code @EnableWebMvc}.
+	 * 配置等同于{@code @EnableWebMvc}。
+	 *
 	 */
 	@Configuration
 	public static class EnableWebMvcConfiguration extends DelegatingWebMvcConfiguration implements ResourceLoaderAware {
@@ -427,10 +477,13 @@ public class WebMvcAutoConfiguration {
 			this.beanFactory = beanFactory;
 		}
 
+		// 处理器适配器
 		@Bean
 		@Override
 		public RequestMappingHandlerAdapter requestMappingHandlerAdapter() {
+			// 处理器适配器
 			RequestMappingHandlerAdapter adapter = super.requestMappingHandlerAdapter();
+			// 在重定向时是否忽略默认model的内容，默认为true
 			adapter.setIgnoreDefaultModelOnRedirect(
 					this.mvcProperties == null || this.mvcProperties.isIgnoreDefaultModelOnRedirect());
 			return adapter;
@@ -444,35 +497,48 @@ public class WebMvcAutoConfiguration {
 			return super.createRequestMappingHandlerAdapter();
 		}
 
+		// 处理器映射器
 		@Bean
+		// @Primary注解的作用其实就是相当于默认值，设置当前bean为RequestMappingHandlerMapping类的默认bean
 		@Primary
 		@Override
 		public RequestMappingHandlerMapping requestMappingHandlerMapping() {
 			// Must be @Primary for MvcUriComponentsBuilder to work
+			//必须是@ Primary，MvcUriComponentsBuilder才能工作
 			return super.requestMappingHandlerMapping();
 		}
 
+		// 主页的设置
 		@Bean
 		public WelcomePageHandlerMapping welcomePageHandlerMapping(ApplicationContext applicationContext) {
+			// 调用getWelcomePage，跳转到下面的方法中
 			WelcomePageHandlerMapping welcomePageHandlerMapping = new WelcomePageHandlerMapping(
 					new TemplateAvailabilityProviders(applicationContext), applicationContext, getWelcomePage(),
 					this.mvcProperties.getStaticPathPattern());
+			// 设置拦截器
 			welcomePageHandlerMapping.setInterceptors(getInterceptors());
+
+			// 设置跨域配置
 			welcomePageHandlerMapping.setCorsConfigurations(getCorsConfigurations());
 			return welcomePageHandlerMapping;
 		}
 
 		private Optional<Resource> getWelcomePage() {
+			// 获取静态资源路径
 			String[] locations = getResourceLocations(this.resourceProperties.getStaticLocations());
+			// this::getIndexHtml调用下面的方法（获取满足条件的第一个资源）
 			return Arrays.stream(locations).map(this::getIndexHtml).filter(this::isReadable).findFirst();
 		}
 
+		// 获取静态资源路径下的index.html页面
 		private Resource getIndexHtml(String location) {
 			return this.resourceLoader.getResource(location + "index.html");
 		}
 
+		// 是否可读
 		private boolean isReadable(Resource resource) {
 			try {
+				// 资源存在且资源的路径不为空
 				return resource.exists() && (resource.getURL() != null);
 			}
 			catch (Exception ex) {
@@ -488,9 +554,11 @@ public class WebMvcAutoConfiguration {
 			return conversionService;
 		}
 
+		// 校验器
 		@Bean
 		@Override
 		public Validator mvcValidator() {
+			// 如果包含javax.validation.Validator 的class类的话
 			if (!ClassUtils.isPresent("javax.validation.Validator", getClass().getClassLoader())) {
 				return super.mvcValidator();
 			}
@@ -515,6 +583,7 @@ public class WebMvcAutoConfiguration {
 			}
 		}
 
+		// 全局异常处理器
 		@Override
 		protected ExceptionHandlerExceptionResolver createExceptionHandlerExceptionResolver() {
 			if (this.mvcRegistrations != null && this.mvcRegistrations.getExceptionHandlerExceptionResolver() != null) {
