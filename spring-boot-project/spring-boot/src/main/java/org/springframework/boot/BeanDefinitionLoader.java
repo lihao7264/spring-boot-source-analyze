@@ -51,6 +51,9 @@ import org.springframework.util.StringUtils;
  * {@link XmlBeanDefinitionReader} and {@link ClassPathBeanDefinitionScanner}. See
  * {@link SpringApplication} for the types of sources that are supported.
  *
+ * 从基础源（包括XML和JavaConfig）加载bean定义。
+ * 充当 AnnotatedBeanDefinitionReader，XmlBeanDefinitionReader 和 ClassPathBeanDefinitionScanner 的简单外观（整合，外观模式）。
+ *
  * @author Phillip Webb
  * @see #setBeanNameGenerator(BeanNameGenerator)
  */
@@ -71,18 +74,24 @@ class BeanDefinitionLoader {
 	/**
 	 * Create a new {@link BeanDefinitionLoader} that will load beans into the specified
 	 * {@link BeanDefinitionRegistry}.
-	 * @param registry the bean definition registry that will contain the loaded beans
-	 * @param sources the bean sources
+	 * 创建一个新的{@link BeanDefinitionLoader}，它将把bean加载到指定的{@link BeanDefinitionRegistry}中。
+	 * @param registry the bean definition registry that will contain the loaded beans  将包含已加载的bean的bean定义注册表
+	 * @param sources the bean sources  bean来源
 	 */
 	BeanDefinitionLoader(BeanDefinitionRegistry registry, Object... sources) {
 		Assert.notNull(registry, "Registry must not be null");
 		Assert.notEmpty(sources, "Sources must not be empty");
 		this.sources = sources;
+		// 注册BeanDefinition解析器
+		// 注解驱动的Bean定义解析器
 		this.annotatedReader = new AnnotatedBeanDefinitionReader(registry);
+		// Xml定义的Bean定义解析器
 		this.xmlReader = new XmlBeanDefinitionReader(registry);
 		if (isGroovyPresent()) {
+			//  GroovyBeanDefinitionReader
 			this.groovyReader = new GroovyBeanDefinitionReader(registry);
 		}
+		// 类路径下的Bean定义扫描器
 		this.scanner = new ClassPathBeanDefinitionScanner(registry);
 		this.scanner.addExcludeFilter(new ClassExcludeFilter(sources));
 	}
@@ -119,18 +128,23 @@ class BeanDefinitionLoader {
 
 	/**
 	 * Load the sources into the reader.
-	 * @return the number of loaded beans
+	 * 将源加载到解析器中。
+	 * @return the number of loaded beans  加载bean的数量
 	 */
 	public int load() {
 		int count = 0;
+		// 遍历源类（其实就是主启动类）
 		for (Object source : this.sources) {
 			count += load(source);
 		}
 		return count;
 	}
 
+	// 加载
 	private int load(Object source) {
 		Assert.notNull(source, "Source must not be null");
+		// 根据传入source的类型，决定如何解析
+		// 主启动类是class，所以走该分支
 		if (source instanceof Class<?>) {
 			return load((Class<?>) source);
 		}
@@ -147,11 +161,16 @@ class BeanDefinitionLoader {
 	}
 
 	private int load(Class<?> source) {
+		// 需要判断classpath下是否有 groovy.lang.MetaClass 类
 		if (isGroovyPresent() && GroovyBeanDefinitionSource.class.isAssignableFrom(source)) {
 			// Any GroovyLoaders added in beans{} DSL can contribute beans here
 			GroovyBeanDefinitionSource loader = BeanUtils.instantiateClass(source, GroovyBeanDefinitionSource.class);
 			load(loader);
 		}
+		// 如果它是一个Component，则用注解解析器来解析它
+		// 主启动类，它被 @SpringBootApplication 注解标注，
+		// 而 @SpringBootApplication 组合了一个 @SpringBootConfiguration，
+		// 它又组合了一个 @Configuration 注解，@Configuration 的底层就是一个 @Component 。
 		if (isComponent(source)) {
 			this.annotatedReader.register(source);
 			return 1;
@@ -210,6 +229,7 @@ class BeanDefinitionLoader {
 		throw new IllegalArgumentException("Invalid source '" + resolvedSource + "'");
 	}
 
+	// 需要判断classpath下是否有 groovy.lang.MetaClass 类
 	private boolean isGroovyPresent() {
 		return ClassUtils.isPresent("groovy.lang.MetaClass", null);
 	}
@@ -272,9 +292,11 @@ class BeanDefinitionLoader {
 		return Package.getPackage(source.toString());
 	}
 
+	// 如果它是一个Component，则用注解解析器来解析它
 	private boolean isComponent(Class<?> type) {
 		// This has to be a bit of a guess. The only way to be sure that this type is
 		// eligible is to make a bean definition out of it and try to instantiate it.
+		// 这必须是一个猜测。 确保此类型符合条件的唯一方法是用它定义bean并尝试实例化它。
 		if (AnnotationUtils.findAnnotation(type, Component.class) != null) {
 			return true;
 		}
@@ -290,6 +312,7 @@ class BeanDefinitionLoader {
 	/**
 	 * Simple {@link TypeFilter} used to ensure that specified {@link Class} sources are
 	 * not accidentally re-added during scanning.
+	 * 简单的{@link TypeFilter}用于确保在扫描过程中不会意外地重新添加指定的{@link Class}源。
 	 */
 	private static class ClassExcludeFilter extends AbstractTypeHierarchyTraversingFilter {
 

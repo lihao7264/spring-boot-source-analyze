@@ -32,18 +32,23 @@ import org.springframework.util.StringUtils;
 /**
  * Class used by {@link SpringApplication} to print the application banner.
  *
+ * {@link SpringApplication}用于打印应用程序banner的类。
+ *
  * @author Phillip Webb
  */
 class SpringApplicationBannerPrinter {
 
+	// banner地址
 	static final String BANNER_LOCATION_PROPERTY = "spring.banner.location";
 
+	// banner图片地址
 	static final String BANNER_IMAGE_LOCATION_PROPERTY = "spring.banner.image.location";
 
 	static final String DEFAULT_BANNER_LOCATION = "banner.txt";
 
 	static final String[] IMAGE_EXTENSION = { "gif", "jpg", "png" };
 
+	// 默认的banner实现为SpringBootBanner类
 	private static final Banner DEFAULT_BANNER = new SpringBootBanner();
 
 	private final ResourceLoader resourceLoader;
@@ -55,6 +60,7 @@ class SpringApplicationBannerPrinter {
 		this.fallbackBanner = fallbackBanner;
 	}
 
+	// 打印
 	public Banner print(Environment environment, Class<?> sourceClass, Log logger) {
 		Banner banner = getBanner(environment);
 		try {
@@ -66,40 +72,57 @@ class SpringApplicationBannerPrinter {
 		return new PrintedBanner(banner, sourceClass);
 	}
 
+	// 打印Banner
 	public Banner print(Environment environment, Class<?> sourceClass, PrintStream out) {
+		// 获取 Banner
 		Banner banner = getBanner(environment);
+		// 打印 Banner
 		banner.printBanner(environment, sourceClass, out);
+		// 把 Banner 封装成 PrintedBanner 返回
 		return new PrintedBanner(banner, sourceClass);
 	}
 
+	// 获取Banner
 	private Banner getBanner(Environment environment) {
 		Banners banners = new Banners();
+		// 先加载图片Banner和文字Banner
 		banners.addIfNotNull(getImageBanner(environment));
 		banners.addIfNotNull(getTextBanner(environment));
+		// 只要有一个，就返回
 		if (banners.hasAtLeastOneBanner()) {
 			return banners;
 		}
+		// 如果 fallbackBanner不为空，则返回fallbackBanner
 		if (this.fallbackBanner != null) {
 			return this.fallbackBanner;
 		}
+		// 都没有，返回默认的
 		return DEFAULT_BANNER;
 	}
 
+	// 获取文本Banner
 	private Banner getTextBanner(Environment environment) {
+		// 获取配置spring.banner.location（默认值为banner.txt）
 		String location = environment.getProperty(BANNER_LOCATION_PROPERTY, DEFAULT_BANNER_LOCATION);
+		// 获取资源
 		Resource resource = this.resourceLoader.getResource(location);
+		// 如果最远存在，则返回ResourceBanner
 		if (resource.exists()) {
 			return new ResourceBanner(resource);
 		}
 		return null;
 	}
 
+	// 获取图片Banner
 	private Banner getImageBanner(Environment environment) {
+		// 获取配置spring.banner.image.location配置
 		String location = environment.getProperty(BANNER_IMAGE_LOCATION_PROPERTY);
+		// 配置不为空，则去加载资源，并返回ImageBanner
 		if (StringUtils.hasLength(location)) {
 			Resource resource = this.resourceLoader.getResource(location);
 			return resource.exists() ? new ImageBanner(resource) : null;
 		}
+		// 遍历获取banner.{ "gif", "jpg", "png" }的三种形式的资源，如果存在，则返回对应的ImageBanner
 		for (String ext : IMAGE_EXTENSION) {
 			Resource resource = this.resourceLoader.getResource("banner." + ext);
 			if (resource.exists()) {
@@ -119,24 +142,30 @@ class SpringApplicationBannerPrinter {
 
 	/**
 	 * {@link Banner} comprised of other {@link Banner Banners}.
+	 * 其它{@link Banner banners} 实现了 {@link Banner}。
 	 */
 	private static class Banners implements Banner {
 
+		// Banner集合
 		private final List<Banner> banners = new ArrayList<>();
 
+		// 如果banner不为空，则添加
 		public void addIfNotNull(Banner banner) {
 			if (banner != null) {
 				this.banners.add(banner);
 			}
 		}
 
+		// banners是否为空（是否至少还有一个Banner）
 		public boolean hasAtLeastOneBanner() {
 			return !this.banners.isEmpty();
 		}
 
+		// 打印Banner
 		@Override
 		public void printBanner(Environment environment, Class<?> sourceClass, PrintStream out) {
 			for (Banner banner : this.banners) {
+				// 将banner打印到指定的打印流。
 				banner.printBanner(environment, sourceClass, out);
 			}
 		}

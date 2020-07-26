@@ -57,8 +57,10 @@ import org.springframework.web.context.support.AnnotationConfigWebApplicationCon
 public class AnnotationConfigServletWebServerApplicationContext extends ServletWebServerApplicationContext
 		implements AnnotationConfigRegistry {
 
+	// 注解Bean定义解析器
 	private final AnnotatedBeanDefinitionReader reader;
 
+	// 类路径Bean定义扫描器
 	private final ClassPathBeanDefinitionScanner scanner;
 
 	private final Set<Class<?>> annotatedClasses = new LinkedHashSet<>();
@@ -197,9 +199,12 @@ public class AnnotationConfigServletWebServerApplicationContext extends ServletW
 		super.prepareRefresh();
 	}
 
+	// BeanFactory的后置处理
 	@Override
 	protected void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
 		super.postProcessBeanFactory(beanFactory);
+		// 包扫描
+		// 进行组件的包扫描
 		if (this.basePackages != null && this.basePackages.length > 0) {
 			this.scanner.scan(this.basePackages);
 		}

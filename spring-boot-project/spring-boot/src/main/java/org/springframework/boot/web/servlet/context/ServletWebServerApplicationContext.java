@@ -126,11 +126,14 @@ public class ServletWebServerApplicationContext extends GenericWebApplicationCon
 
 	/**
 	 * Register ServletContextAwareProcessor.
+	 * 注册ServletContextAwareProcessor。
 	 * @see ServletContextAwareProcessor
 	 */
 	@Override
 	protected void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
+		// 注册ServletContext注入器
 		beanFactory.addBeanPostProcessor(new WebApplicationContextServletContextAwareProcessor(this));
+		// 忽略依赖的ServletContextAware
 		beanFactory.ignoreDependencyInterface(ServletContextAware.class);
 		registerWebApplicationScopes();
 	}
@@ -237,8 +240,10 @@ public class ServletWebServerApplicationContext extends GenericWebApplicationCon
 	}
 
 	private void registerWebApplicationScopes() {
+		// 它是表示在Web应用上已经存在的作用域
 		ExistingWebApplicationScopes existingScopes = new ExistingWebApplicationScopes(getBeanFactory());
 		WebApplicationContextUtils.registerWebApplicationScopes(getBeanFactory());
+		// 注册到bean工厂中
 		existingScopes.restore();
 	}
 
@@ -354,12 +359,16 @@ public class ServletWebServerApplicationContext extends GenericWebApplicationCon
 	 * Utility class to store and restore any user defined scopes. This allow scopes to be
 	 * registered in an ApplicationContextInitializer in the same way as they would in a
 	 * classic non-embedded web application context.
+	 * 实用程序类，用于存储和还原任何用户定义的范围。
+	 * 这允许范围以与在传统的非嵌入式Web应用程序上下文中相同的方式在ApplicationContextInitializer中注册。
 	 */
 	public static class ExistingWebApplicationScopes {
 
+		// 缓存作用域
 		private static final Set<String> SCOPES;
 
 		static {
+			// 缓存了两种scope，分别是 request 域和 session 域。
 			Set<String> scopes = new LinkedHashSet<>();
 			scopes.add(WebApplicationContext.SCOPE_REQUEST);
 			scopes.add(WebApplicationContext.SCOPE_SESSION);
@@ -371,6 +380,7 @@ public class ServletWebServerApplicationContext extends GenericWebApplicationCon
 		private final Map<String, Scope> scopes = new HashMap<>();
 
 		public ExistingWebApplicationScopes(ConfigurableListableBeanFactory beanFactory) {
+			// 获取注册的scope
 			this.beanFactory = beanFactory;
 			for (String scopeName : SCOPES) {
 				Scope scope = beanFactory.getRegisteredScope(scopeName);
@@ -380,6 +390,9 @@ public class ServletWebServerApplicationContext extends GenericWebApplicationCon
 			}
 		}
 
+		// 把现在缓存的所有作用域，注册到 BeanFactory 中。
+		// 大概猜测这是将Web的request域和session域注册到IOC容器，
+		// 让IOC容器知道这两种作用域（学过 SpringFramework 都知道Bean的作用域有request 和 session）。
 		public void restore() {
 			this.scopes.forEach((key, value) -> {
 				if (logger.isInfoEnabled()) {

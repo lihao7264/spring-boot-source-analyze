@@ -30,6 +30,9 @@ import org.springframework.util.ObjectUtils;
  * {@link Converter} to convert from a {@link String} to a {@link Duration}. Supports
  * {@link Duration#parse(CharSequence)} as well a more readable {@code 10s} form.
  *
+ * {@link Converter}可以将{@link String}转换为{@link Duration}。
+ * 支持{@link Duration＃parse（CharSequence）}以及更具可读性的{@code 10s}格式。
+ *
  * @author Phillip Webb
  * @see DurationFormat
  * @see DurationUnit

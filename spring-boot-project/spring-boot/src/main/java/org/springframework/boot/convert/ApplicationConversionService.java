@@ -34,6 +34,9 @@ import org.springframework.util.StringValueResolver;
  * {@link #addApplicationFormatters(FormatterRegistry)} utility methods for ad-hoc use
  * against registry instance.
  *
+ * {@link FormattingConversionService}的一种特殊设置，
+ * 默认情况下配置了适用于大多数Spring Boot应用程序的转换器和格式化程序。
+ *
  * @author Phillip Webb
  * @since 2.0.0
  */
@@ -59,15 +62,22 @@ public class ApplicationConversionService extends FormattingConversionService {
 	 * Note: This method actually returns an {@link ApplicationConversionService}
 	 * instance. However, the {@code ConversionService} signature has been preserved for
 	 * binary compatibility.
+	 *
+	 * 返回共享的默认应用程序{@code ConversionService}实例，并在需要时延迟构建它。
+	 * 注意：此方法实际上返回一个{@link ApplicationConversionService}实例。
+	 * 但是，{@code ConversionService}签名已保留，以实现二进制兼容性。
+	 *
 	 * @return the shared {@code ApplicationConversionService} instance (never
 	 * {@code null})
 	 */
 	public static ConversionService getSharedInstance() {
 		ApplicationConversionService sharedInstance = ApplicationConversionService.sharedInstance;
+		// 双重检查单例模式
 		if (sharedInstance == null) {
 			synchronized (ApplicationConversionService.class) {
 				sharedInstance = ApplicationConversionService.sharedInstance;
 				if (sharedInstance == null) {
+					// 创建一个ApplicationConversionService对象
 					sharedInstance = new ApplicationConversionService();
 					ApplicationConversionService.sharedInstance = sharedInstance;
 				}
@@ -79,8 +89,10 @@ public class ApplicationConversionService extends FormattingConversionService {
 	/**
 	 * Configure the given {@link FormatterRegistry} with formatters and converters
 	 * appropriate for most Spring Boot applications.
+	 * 使用适合大多数Spring Boot应用程序的格式化程序和转换器配置给定的{@link FormatterRegistry}。
 	 * @param registry the registry of converters to add to (must also be castable to
 	 * ConversionService, e.g. being a {@link ConfigurableConversionService})
+	 * 要添加到的转换器注册表（还必须可转换为ConversionService，例如{@link ConfigurableConversionService}）
 	 * @throws ClassCastException if the given FormatterRegistry could not be cast to a
 	 * ConversionService
 	 */
@@ -93,6 +105,7 @@ public class ApplicationConversionService extends FormattingConversionService {
 
 	/**
 	 * Add converters useful for most Spring Boot applications.
+	 * 添加对大多数Spring Boot应用程序有用的转换器。
 	 * @param registry the registry of converters to add to (must also be castable to
 	 * ConversionService, e.g. being a {@link ConfigurableConversionService})
 	 * @throws ClassCastException if the given ConverterRegistry could not be cast to a
@@ -126,6 +139,7 @@ public class ApplicationConversionService extends FormattingConversionService {
 
 	/**
 	 * Add formatters useful for most Spring Boot applications.
+	 * 添加对大多数Spring Boot应用程序有用的格式化程序。
 	 * @param registry the service to register default formatters with
 	 */
 	public static void addApplicationFormatters(FormatterRegistry registry) {

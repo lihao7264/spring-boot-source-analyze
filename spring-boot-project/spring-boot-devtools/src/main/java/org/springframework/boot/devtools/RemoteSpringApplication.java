@@ -78,7 +78,9 @@ public final class RemoteSpringApplication {
 		return listeners;
 	}
 
+	// 获取Banner
 	private Banner getBanner() {
+		// 类文件上的remote-banner.txt资源
 		ClassPathResource banner = new ClassPathResource("remote-banner.txt", RemoteSpringApplication.class);
 		return new ResourceBanner(banner);
 	}

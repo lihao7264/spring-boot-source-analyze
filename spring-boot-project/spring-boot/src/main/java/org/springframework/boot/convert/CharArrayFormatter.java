@@ -23,6 +23,7 @@ import org.springframework.format.Formatter;
 
 /**
  * {@link Formatter} for {@code char[]}.
+ * 用于{@code char []} 的 {@link Formatter} 。
  *
  * @author Phillip Webb
  */

@@ -25,6 +25,7 @@ import org.springframework.core.env.Environment;
 
 /**
  * Default Banner implementation which writes the 'Spring' banner.
+ * 默认的Banner实现，它写入"Spring"的banner。
  *
  * @author Phillip Webb
  */
@@ -39,18 +40,23 @@ class SpringBootBanner implements Banner {
 
 	private static final int STRAP_LINE_SIZE = 42;
 
+	// 打印Banner
 	@Override
 	public void printBanner(Environment environment, Class<?> sourceClass, PrintStream printStream) {
+		// 先打印Banner内容
 		for (String line : BANNER) {
 			printStream.println(line);
 		}
+		// 打印SpringBoot的版本
 		String version = SpringBootVersion.getVersion();
 		version = (version != null) ? " (v" + version + ")" : "";
 		StringBuilder padding = new StringBuilder();
+		// 凑够字符（字符填充）
 		while (padding.length() < STRAP_LINE_SIZE - (version.length() + SPRING_BOOT.length())) {
 			padding.append(" ");
 		}
 
+		// 输出绿色的SPRING_BOOT，输出版本号(默认颜色)、版本号(暗淡、默认颜色)
 		printStream.println(AnsiOutput.toString(AnsiColor.GREEN, SPRING_BOOT, AnsiColor.DEFAULT, padding.toString(),
 				AnsiStyle.FAINT, version));
 		printStream.println();
