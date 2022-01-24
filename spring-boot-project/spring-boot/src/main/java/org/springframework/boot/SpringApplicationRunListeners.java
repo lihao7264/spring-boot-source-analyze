@@ -66,6 +66,7 @@ class SpringApplicationRunListeners {
 		}
 	}
 
+	// 发布started事件
 	public void started(ConfigurableApplicationContext context) {
 		for (SpringApplicationRunListener listener : this.listeners) {
 			listener.started(context);

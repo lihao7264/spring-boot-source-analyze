@@ -350,12 +350,15 @@ public class SpringApplication {
 			// 4.9 初始化IOC容器
 			prepareContext(context, environment, listeners, applicationArguments, printedBanner);
 			refreshContext(context);
+			// 4.11 刷新后的处理
 			afterRefresh(context, applicationArguments);
 			stopWatch.stop();
 			if (this.logStartupInfo) {
 				new StartupInfoLogger(this.mainApplicationClass).logStarted(getApplicationLog(), stopWatch);
 			}
+			// 4.12 发布started事件
 			listeners.started(context);
+			// 4.13 运行器回调
 			callRunners(context, applicationArguments);
 		}
 		catch (Throwable ex) {
@@ -882,17 +885,20 @@ public class SpringApplication {
 
 	/**
 	 * Called after the context has been refreshed.
+	 * 刷新后的处理
 	 * @param context the application context
 	 * @param args the application arguments
 	 */
 	protected void afterRefresh(ConfigurableApplicationContext context, ApplicationArguments args) {
 	}
 
+	//从容器中获取了ApplicationRunner和CommandLineRunner
 	private void callRunners(ApplicationContext context, ApplicationArguments args) {
 		List<Object> runners = new ArrayList<>();
 		runners.addAll(context.getBeansOfType(ApplicationRunner.class).values());
 		runners.addAll(context.getBeansOfType(CommandLineRunner.class).values());
 		AnnotationAwareOrderComparator.sort(runners);
+		//ApplicationRunner先回调，CommandLineRunner后回调
 		for (Object runner : new LinkedHashSet<>(runners)) {
 			if (runner instanceof ApplicationRunner) {
 				callRunner((ApplicationRunner) runner, args);

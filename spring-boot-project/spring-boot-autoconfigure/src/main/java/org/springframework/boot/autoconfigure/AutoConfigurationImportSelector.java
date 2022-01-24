@@ -118,7 +118,7 @@ public class AutoConfigurationImportSelector implements DeferredImportSelector, 
 	 */
 	protected AutoConfigurationEntry getAutoConfigurationEntry(AutoConfigurationMetadata autoConfigurationMetadata,
 			AnnotationMetadata annotationMetadata) {
-		//是否启动自动装配
+		// 是否启动自动装配
 		if (!isEnabled(annotationMetadata)) {
 			return EMPTY_ENTRY;
 		}

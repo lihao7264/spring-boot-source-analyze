@@ -175,11 +175,14 @@ public class ServletWebServerApplicationContext extends GenericWebApplicationCon
 		stopAndReleaseWebServer();
 	}
 
+	// 创建WebServer
 	private void createWebServer() {
 		WebServer webServer = this.webServer;
 		ServletContext servletContext = getServletContext();
 		if (webServer == null && servletContext == null) {
+			// 9.1 这一步创建了嵌入式Servlet容器的工厂
 			ServletWebServerFactory factory = getWebServerFactory();
+			// 9.2 创建嵌入式Servlet容器
 			this.webServer = factory.getWebServer(getSelfInitializer());
 		}
 		else if (servletContext != null) {
@@ -197,10 +200,14 @@ public class ServletWebServerApplicationContext extends GenericWebApplicationCon
 	 * Returns the {@link ServletWebServerFactory} that should be used to create the
 	 * embedded {@link WebServer}. By default this method searches for a suitable bean in
 	 * the context itself.
-	 * @return a {@link ServletWebServerFactory} (never {@code null})
+	 * 返回用于创建嵌入式{@link WebServer}的{@link ServletWebServerFactory}。
+	 * 默认情况下，此方法在上下文本身中搜索合适的bean。
+	 *
+	 * @return a {@link ServletWebServerFactory} (never {@code null})  {@link ServletWebServerFactory}（决不会为{@code null}）
 	 */
 	protected ServletWebServerFactory getWebServerFactory() {
 		// Use bean names so that we don't consider the hierarchy
+		// 获取IOC容器中类型为ServletWebServerFactory的Bean
 		String[] beanNames = getBeanFactory().getBeanNamesForType(ServletWebServerFactory.class);
 		if (beanNames.length == 0) {
 			throw new ApplicationContextException("Unable to start ServletWebServerApplicationContext due to missing "
@@ -296,6 +303,7 @@ public class ServletWebServerApplicationContext extends GenericWebApplicationCon
 		}
 	}
 
+	//启动嵌入式Web容器
 	private WebServer startWebServer() {
 		WebServer webServer = this.webServer;
 		if (webServer != null) {
